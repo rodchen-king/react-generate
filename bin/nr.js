@@ -28,11 +28,20 @@ if (program.component) {
   }
 
   var pathArray = name.split('/')
+  
+  console.log(pathArray.length)
 
   if (pathArray.length == 1) {
     localPath = `${localPath}/${pathArray[0]}`
   } else {
+    var folderPath = `${localPath}/${pathArray[0]}`
     localPath = `${localPath}/${pathArray[0]}/${pathArray[1]}`
+    fs.mkdir(folderPath, function(err){
+      if(err){
+          console.log('创建文件夹出错！');
+      }
+      console.log('创建文件夹成功！');
+    });
   }
 
 
