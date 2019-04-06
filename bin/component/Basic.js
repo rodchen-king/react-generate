@@ -1,81 +1,41 @@
-import React, { PureComponent, Fragment } from 'react';
-import { connect } from 'dva';
-import moment from 'moment';
-import router from 'umi/router';
-import {
-  Row,
-  Col,
-  Card,
-  Form,
-  Input,
-  Select,
-  Icon,
-  Button,
-  Dropdown,
-  Menu,
-  DatePicker,
-  Modal,
-  message,
-  Badge,
-  Divider,
-  Steps,
-  Radio,
-  Popconfirm,
-  Upload,
-} from 'antd';
+import { stringify } from 'qs';
+import request from '@/utils/request';
+import baseUrl from '@/services/baseUrl';
 
-import { handelAuth } from '@/utils/utils';
-import Authorized from '@/components/Authorized/Authorized';
-
-import styles from './Basic.less';
-
-
-
-@connect(({ }) => ({
-
-}))
-
-class Basic extends PureComponent {
-
-  contructor(props) {
-    super(props)
-  }
-
-  state = {
-    
-  };
-
-  /**
-   * 生命周期
-   */
-
-  componentWillMount() {
-  }
-
-  componentDidMount() {
-  }
-
-  /**
-   * 无状态组件
-   */
-
-  renderBasicForm() {
-    const {
-    } = this.props;
-
-    return (
-    );
-  }
-
-  /**
-   * 状态组件render函数
-   */
-
-  render() {
-    return (
-      
-    )
-  }
+// 查询列表
+export async function queryAccount(params) {
+  return request(`${baseUrl}/sys/user?${stringify(params)}`);
 }
 
-export default Basic;
+// 删除（单个/批量）
+export async function removeAccount(params) {
+  return request(`${baseUrl}/sys/user/${params}`, {
+    method: 'DELETE',
+  });
+}
+
+// 添加
+export async function addAccount(params) {
+  return request(`${baseUrl}/sys/user`, {
+    method: 'POST',
+    body: {
+      ...params,
+      method: 'post',
+    },
+  });
+}
+
+// 获取信息
+export async function queryAccountInfo(userId) {
+  return request(`${baseUrl}/sys/user/info/${userId}`);
+}
+
+// 更新信息
+export async function updateAccount(params) {
+  return request(`${baseUrl}/sys/user/${params.id}`, {
+    method: 'PUT',
+    body: {
+      ...params,
+    },
+  });
+}
