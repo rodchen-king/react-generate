@@ -1,6 +1,6 @@
 {
   "name": "react-generate-bitsun",
-  "version": "1.0.2",
+  "version": "1.0.33",
   "description": "修复带有文件夹的组件",
   "main": "index.js",
   "bin": {

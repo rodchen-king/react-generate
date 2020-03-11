@@ -12,6 +12,63 @@ program
     name = cmd;
 });
 
+var stat=fs.stat;
+
+var copy=function(src,dst){
+    //读取目录
+    fs.readdir(src,function(err,paths){
+        if(err){
+            throw err;
+        }
+        paths.forEach(function(path){
+            var _src=src+'/'+path;
+            var _dst=dst+'/'+path;
+            var readable;
+            var writable;
+            stat(_src,function(err,st){
+                if(err){
+                    throw err;
+                }
+                
+                if(st.isFile()){
+                    // readable=fs.createReadStream(_src);//创建读取流
+                    // writable=fs.createWriteStream(_dst);//创建写入流
+                    // readable.pipe(writable)
+                    fs.readFile(_src,function(err,data){
+                      if(err){
+                          return err;
+                      }
+                      let str = data.toString();
+                      str = str.replace(/basicComponents/g, name);
+                      str = str.replace(/基础/g, chineseName);
+
+                      fs.writeFile(_dst, str, function (err) {
+                          if (err) return err;
+                          console.log(`创建${_dst}成功`)
+                      });
+                  });
+
+                }else if(st.isDirectory()){
+                    exists(_src,_dst,copy);
+                }
+            });
+        });
+    });
+}
+
+var exists=function(src,dst,callback){
+    //测试某个路径下文件是否存在
+    fs.exists(dst,function(exists){
+        if(exists){//不存在
+            callback(src,dst);
+        }else{//存在
+            fs.mkdir(dst,function(){//创建目录
+                callback(src,dst)
+            })
+        }
+    })
+}
+
 
 program.parse(process.argv)
 
@@ -28,9 +85,8 @@ if (program.component) {
   }
 
   var pathArray = name.split('/')
+  var chineseName = process.argv[process.argv.length - 1]
   
-  console.log(pathArray.length)
-
   if (pathArray.length == 1) {
     localPath = `${localPath}/${pathArray[0]}`
   } else {
@@ -44,59 +100,28 @@ if (program.component) {
     });
   }
 
-
-  // fs.stat(localPath, function (err, stats) {
-  //   //检验是否为文件
-  //      if(stats.isFile()){
-  //          main(`${localPath}.js`, './component/Basic.js');    
-  //          main(`${localPath}.less`, './component/Basic.less');    
-  //      }else{
-  //         deleteFolder(localPath)
-  //         main(localPath); 
-  //      }
-  //  });
-
-  fs.open(`${localPath}.js`, "w",function (err) {
-
-  });
-  fs.open(`${localPath}.less`, "w",function (err) {
-
-  });
-  
-  // deleteFolder(`${localPath}.js`)
-  // deleteFolder(`${localPath}.less`)
-
-  main([`${localPath}.js`, `${__dirname}/component/Basic.js`]);    
-  replaceContent(`${localPath}.js`)
-  main([`${localPath}.less`, `${__dirname}/component/Basic.less`]);    
-  replaceContent(`${localPath}.less`)
+  exists(`${__dirname}/BasicComponent`,`${localPath}`,copy)
 
   console.log("创建组件成功")
 }
+
 if (program.route)
   console.log('route')
 
-
-
-function copy(filename,src) {
-    fs.writeFileSync(filename, fs.readFileSync(src));   //filename如果不存在，则会在路径上新建文件
+function replaceFile (filePath,sourceRegx,targetStr){
+  fs.readFile(filePath,function(err,data){
+      if(err){
+          return err;
+      }
+      console.log(filePath)
+      let str = data.toString();
+      str = str.replace(sourceRegx,targetStr);
+      fs.writeFile(filePath, str, function (err) {
+          if (err) return err;
+      });
+  });
 }
 
-function main(argv) {
-    copy(argv[0], argv[1]);   //argv[0]为要拷贝的文件名，argv[1]为拷贝数据的来源
-    
-}
-
-function replaceContent(filePath) {
-  fs.readFile(filePath,'utf8',function(err,files){
-    //console.log(files)
-    var result = files.replace(/Basic/g, name);
-
-    fs.writeFile(filePath, result, 'utf8', function (err) {
-         if (err) return console.log(err);
-    });
-  })
-}
 
 function deleteFolder(path) {
   if( fs.existsSync(path) ) {
